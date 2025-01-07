@@ -22,12 +22,10 @@ class ApiController extends AbstractController
 {
     private $serializer;
     private $validator;
-    private $tokenStorage;
-    private $JWTTokenManager;
-
 
     public function __construct(
-        ValidatorInterface $validator,
+        ValidatorInterface $validator
+    )
     {
         $this->serializer = SerializerBuilder::create()->build();
         $this->validator = $validator;
