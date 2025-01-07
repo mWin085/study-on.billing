@@ -6,6 +6,7 @@ use App\Dto\UserDto;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectManager;
+use http\Message\Body;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,6 +18,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use JMS\Serializer\SerializerBuilder;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Nelmio\ApiDocBundle\Attribute\Security;
+use OpenApi\Attributes as OA;
 
 class ApiController extends AbstractController
 {
@@ -31,14 +34,122 @@ class ApiController extends AbstractController
         $this->validator = $validator;
     }
     #[Route('/api/v1/auth', name: 'app_api_auth', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/v1/auth',description: 'Авторизация пользователя'
+    )]
+    #[OA\RequestBody(
+        request: true, description: 'JSON payload', required: true,
+        content: [
+            new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: "username",
+                        description: "Email",
+                        type: "string",
+                        example: "user@user.com"
+                    ),
+                    new OA\Property(
+                        property: "password",
+                        description: "Пароль",
+                        type: "string",
+                        example: "useruser"
+                    ),
+                ]
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Success',
+        content: [
+            new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "token", type:"string", example: '123123123123123'),
+                    ]
+                )
+
+
+        ]
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Error',
+        content: [
+            new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: "error",
+                        type: "string",example: 'error message'
+                    ),
+                ]
+            )
+
+        ]
+    )]
+    #[OA\Tag(name: "user")]
     public function index()
     {
     }
+
     #[Route('/api/v1/register', name: 'app_api_register', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/v1/register',description: 'Регистрация пользователя'
+    )]
+    #[OA\RequestBody(
+        request: true, description: 'JSON payload', required: true,
+        content: [
+            new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: "username",
+                        description: "Email",
+                        type: "string",
+                        example: "user@user.com"
+                    ),
+                    new OA\Property(
+                        property: "password",
+                        description: "Пароль",
+                        type: "string",
+                        example: "useruser"
+                    ),
+                ]
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Success',
+        content: [
+            new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "token", type:"string", example: '123123123123123'),
+                    new OA\Property(property: "roles", type: "string", example: ['ROLE']),
+                ]
+            )
+
+
+        ]
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Error',
+        content: [
+            new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: "error",
+                        type: "string",example: 'error message'
+                    ),
+                ]
+            )
+
+        ]
+    )]
+    #[OA\Tag(name: "user")]
     public function register(Request $request,
                              EntityManagerInterface $entityManager,
                              JWTTokenManagerInterface $tokenManager,
-                             UserPasswordHasherInterface $hasher)
+                             UserPasswordHasherInterface $hasher): JsonResponse
     {
         $userDto = $this->serializer->deserialize(
             $request->getContent(),
@@ -69,12 +180,48 @@ class ApiController extends AbstractController
 
     /**
      * @throws JWTDecodeFailureException
+     * @Security(name="Bearer")
      */
     #[Route('/api/v1/users/current', name: 'app_api_current_user', methods: ['POST'])]
+    #[OA\Tag(name: "user")]
+    #[Security(name: "Bearer")]
+    #[OA\Post(
+        path: '/api/v1/users/current',description: 'Информация о пользователе'
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Success',
+        content: [
+            new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "username", type:"string", example: 'user@user.com'),
+                    new OA\Property(property: "roles", type: "string", example: ['ROLE']),
+                    new OA\Property(property: "balance", type:"string", example: '152.2'),
+                ]
+            )
+
+
+        ]
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Error',
+        content: [
+            new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: "error",
+                        type: "string",example: 'Expired JWT token'
+                    ),
+                ]
+            )
+
+        ]
+    )]
     public function currentUser(Request $request,
                                 EntityManagerInterface $entityManager,
                                 JWTTokenManagerInterface $JWTTokenManager,
-                                TokenStorageInterface $tokenStorage)
+                                TokenStorageInterface $tokenStorage): JsonResponse
     {
         $tokenData = $JWTTokenManager->decode($tokenStorage->getToken());
 

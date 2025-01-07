@@ -14,6 +14,8 @@
         "doctrine/orm": "^3.3.1",
         "jms/serializer-bundle": "^5.5.1",
         "lexik/jwt-authentication-bundle": "^3.1.1",
+        "nelmio/api-doc-bundle": "^4.33",
+        "symfony/asset": "7.2.*",
         "symfony/console": "7.2.*",
         "symfony/dotenv": "7.2.*",
         "symfony/flex": "^2.4.7",
@@ -22,8 +24,11 @@
         "symfony/phpunit-bridge": "^7.2",
         "symfony/runtime": "7.2.*",
         "symfony/security-bundle": "7.2.*",
+        "symfony/twig-bundle": "7.2.*",
         "symfony/validator": "7.2.*",
-        "symfony/yaml": "7.2.*"
+        "symfony/yaml": "7.2.*",
+        "twig/extra-bundle": "^2.12|^3.0",
+        "twig/twig": "^2.12|^3.0"
     },
     "config": {
         "allow-plugins": {
