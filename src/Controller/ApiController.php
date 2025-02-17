@@ -232,7 +232,7 @@ class ApiController extends AbstractController
         }
 
         return $this->json(
-            ["username" => $userByEmail->getEmail(), "roles" => $userByEmail->getRoles(), "balance" => $userByEmail->getBalance()]
+            ["code" => 201, "username" => $userByEmail->getEmail(), "roles" => $userByEmail->getRoles(), "balance" => $userByEmail->getBalance()]
         );
         //$jwt = (array)JWTManager::decode($token);
     }
