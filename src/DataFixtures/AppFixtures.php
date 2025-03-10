@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Course;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -23,21 +24,41 @@ class AppFixtures extends Fixture
 
 
         $user = new User();
-        $password = $this->hasher->hashPassword($user, 'admin');
+        $password = $this->hasher->hashPassword($user, 'adminadmin');
         $user->setEmail('admin@admin.com');
         $user->setPassword($password);
         $user->setRoles(['ROLE_SUPER_ADMIN']);
-        $user->setBalance(0.0);
+        $user->setBalance($_ENV['BALANCE']);
         $manager->persist($user);
         $manager->flush();
 
         $user = new User();
-        $password = $this->hasher->hashPassword($user, 'user');
+        $password = $this->hasher->hashPassword($user, 'useruser');
         $user->setEmail('user@user.com');
         $user->setPassword($password);
         $user->setRoles(['ROLE_USER']);
-        $user->setBalance(0.0);
+        $user->setBalance($_ENV['BALANCE']);
         $manager->persist($user);
+        $manager->flush();
+
+        $course = new Course();
+        $course->setType(0);
+        $course->setCode('course_1');
+        $manager->persist($course);
+        $manager->flush();
+
+        $course = new Course();
+        $course->setType(1);
+        $course->setCode('course_2');
+        $course->setPrice(299);
+        $manager->persist($course);
+        $manager->flush();
+
+        $course = new Course();
+        $course->setType(2);
+        $course->setCode('course_3');
+        $course->setPrice(1299);
+        $manager->persist($course);
         $manager->flush();
     }
 }

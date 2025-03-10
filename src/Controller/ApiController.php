@@ -5,8 +5,8 @@ namespace App\Controller;
 use App\Dto\UserDto;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ObjectManager;
-use http\Message\Body;
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use JMS\Serializer\SerializerBuilder;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
@@ -25,6 +24,7 @@ class ApiController extends AbstractController
 {
     private $serializer;
     private $validator;
+
 
     public function __construct(
         ValidatorInterface $validator
@@ -123,6 +123,7 @@ class ApiController extends AbstractController
             new OA\JsonContent(
                 properties: [
                     new OA\Property(property: "token", type:"string", example: '123123123123123'),
+                    new OA\Property(property: "refreshToken", type:"string", example: '123123123123123'),
                     new OA\Property(property: "roles", type: "string", example: ['ROLE']),
                 ]
             )
@@ -149,7 +150,10 @@ class ApiController extends AbstractController
     public function register(Request $request,
                              EntityManagerInterface $entityManager,
                              JWTTokenManagerInterface $tokenManager,
-                             UserPasswordHasherInterface $hasher): JsonResponse
+                             UserPasswordHasherInterface $hasher,
+                             RefreshTokenGeneratorInterface $refreshTokenGenerator,
+                             RefreshTokenManagerInterface $refreshTokenManager
+    ): JsonResponse
     {
         $userDto = $this->serializer->deserialize(
             $request->getContent(),
@@ -171,11 +175,22 @@ class ApiController extends AbstractController
 
         $user = User::fromDto($userDto);
         $user->setPassword($hasher->hashPassword($user, $userDto->password));
+        $user->setBalance($_ENV['BALANCE']);
         $entityManager->persist($user);
         $entityManager->flush();
 
         $token = $tokenManager->create($user);
-        return $this->json(['token' => $token, 'roles' => $user->getRoles()], Response::HTTP_CREATED);
+
+        $refreshToken = $refreshTokenGenerator->createForUserWithTtl(
+            $user,
+            (new \DateTime())->modify('+1 month')->getTimestamp()
+        );
+        $refreshTokenManager->save($refreshToken);
+        return $this->json([
+            'token' => $token,
+            'roles' => $user->getRoles(),
+            'refreshToken' => $refreshToken->getRefreshToken()
+        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -218,21 +233,13 @@ class ApiController extends AbstractController
 
         ]
     )]
-    public function currentUser(Request $request,
-                                EntityManagerInterface $entityManager,
-                                JWTTokenManagerInterface $JWTTokenManager,
-                                TokenStorageInterface $tokenStorage): JsonResponse
+
+    public function currentUser(): JsonResponse
     {
-        $tokenData = $JWTTokenManager->decode($tokenStorage->getToken());
 
-        $userByEmail = $entityManager->getRepository(User::class)->findOneBy(['email' => $tokenData['username']]);
-
-        if (!$userByEmail) {
-            return $this->json(['error' => 'No user with this email address exists'], Response::HTTP_BAD_REQUEST);
-        }
-
+        $user = $this->getUser();
         return $this->json(
-            ["code" => 201, "username" => $userByEmail->getEmail(), "roles" => $userByEmail->getRoles(), "balance" => $userByEmail->getBalance()]
+            ["code" => Response::HTTP_CREATED, "username" => $user->getEmail(), "roles" => $user->getRoles(), "balance" => $user->getBalance()]
         );
         //$jwt = (array)JWTManager::decode($token);
     }
