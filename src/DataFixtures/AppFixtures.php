@@ -44,12 +44,14 @@ class AppFixtures extends Fixture
         $course = new Course();
         $course->setType(0);
         $course->setCode('course_1');
+        $course->setTitle('Древняя Греция: от мифов к демократии');
         $manager->persist($course);
         $manager->flush();
 
         $course = new Course();
         $course->setType(1);
         $course->setCode('course_2');
+        $course->setTitle('Средневековая Европа: войны, крестовые походы и культурные преобразования');
         $course->setPrice(299);
         $manager->persist($course);
         $manager->flush();
@@ -57,6 +59,7 @@ class AppFixtures extends Fixture
         $course = new Course();
         $course->setType(2);
         $course->setCode('course_3');
+        $course->setTitle('Великие географические открытия и их последствия');
         $course->setPrice(1299);
         $manager->persist($course);
         $manager->flush();

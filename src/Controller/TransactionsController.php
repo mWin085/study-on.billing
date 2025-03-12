@@ -34,6 +34,28 @@ class TransactionsController extends AbstractController{
         path: '/api/v1/transactions',description: 'Список транзакций'
     )]
 
+    #[OA\Parameter(
+        name: 'course_code',
+        description: 'Фильтр по коду курса',
+        in: 'query',
+        schema: new OA\Schema(type: 'string'),
+        example: 'course_3'
+    )]
+    #[OA\Parameter(
+        name: 'type',
+        description: 'Фильтр по типу транзакции',
+        in: 'query',
+        schema: new OA\Schema(type: 'string'),
+        example: 'payment'
+    )]
+    #[OA\Parameter(
+        name: 'skip_expired',
+        description: 'Фильтр по активным оплатам',
+        in: 'query',
+        schema: new OA\Schema(type: 'boolean'),
+        example: true
+    )]
+
     #[OA\Response(
         response: 201,
         description: 'Success',
@@ -94,11 +116,11 @@ class TransactionsController extends AbstractController{
         return $this->json($result);
     }
 
-    #[Route('/api/v1/deposit', name: 'app_api_deposit', methods: ['POST'])]
+    /*#[Route('/api/v1/deposit', name: 'app_api_deposit', methods: ['POST'])]
     #[Security(name: "Bearer")]
     public function deposit(Request $request)
     {
         $amount = (float)$request->request->get('amount');
         return $this->json($this->paymentService->deposit($amount, $this->getUser()));
-    }
+    }*/
 }

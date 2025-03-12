@@ -27,6 +27,9 @@ class Course
     #[ORM\Column(nullable: true)]
     private ?float $price = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $title = null;
+
     /**
      * @var Collection<int, Transaction>
      */
@@ -72,7 +75,7 @@ class Course
         return $this->price;
     }
 
-    public function setPrice(float $price): static
+    public function setPrice(?float $price): static
     {
         $this->price = $price;
 
@@ -107,5 +110,27 @@ class Course
         }
 
         return $this;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+
+    public static function fromDto(mixed $courseDto): Course
+    {
+        $course = new self();
+        
+        $course->setCode($courseDto->code);
+        $course->setType(array_flip(CourseRepository::COURSE_TYPES)[$courseDto->type]);
+        $course->setTitle($courseDto->title);
+        $course->setPrice($courseDto->price);
+
+        return $course;
     }
 }

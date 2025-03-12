@@ -15,7 +15,7 @@ class CourseRepository extends ServiceEntityRepository
     const COURSE_TYPES = [
         0 => 'free',
         1 => 'rent',
-        2 => 'bye',
+        2 => 'buy',
     ];
 
 
