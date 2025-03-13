@@ -34,7 +34,7 @@ class PaymentService
             $transaction->setValue($course->getPrice());
             $transaction->setCreatedAt($date);
             if (CourseRepository::COURSE_TYPES[$course->getType()] == 'rent'){
-                $transaction->setValidAt($date->modify('+1 month'));
+                $transaction->setValidAt($date->modify('+1 week'));
             }
 
             $user->setBalance($user->getBalance() - $course->getPrice());

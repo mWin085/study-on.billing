@@ -54,6 +54,31 @@ class TransactionRepository extends ServiceEntityRepository
                 ->getResult();
         }
 
+        public function findRentByDate(\DateInterval $dateInterval)
+        {
+            $date = (new \DateTime())->add($dateInterval);
+            return $this->createQueryBuilder('t')
+                ->select('usr.email as email', 'c.title as coursename', 't.validAt as validAt')
+                ->innerJoin('t.course', 'c')
+                ->innerJoin('t.client', 'usr')
+                ->andWhere('c.type = :type')
+                ->setParameter('type', array_flip(CourseRepository::COURSE_TYPES)['rent'])
+                ->andWhere('t.validAt < :validAt')
+                ->setParameter('validAt', $date)
+                ->getQuery()->getResult();
+        }
+
+    public function findAllByDate(\DateInterval $dateInterval)
+    {
+        $date = (new \DateTime())->sub($dateInterval);
+        return $this->createQueryBuilder('t')
+            ->select('c.title as coursename', 't.createdAt as createdAt', 't.value as value', 'c.type as coursetype', 'c.code as coursecode')
+            ->innerJoin('t.course', 'c')
+            ->andWhere('t.createdAt > :createdAt')
+            ->setParameter('createdAt', $date)
+            ->getQuery()->getResult();
+    }
+
     //    public function findOneBySomeField($value): ?Transaction
     //    {
     //        return $this->createQueryBuilder('t')
