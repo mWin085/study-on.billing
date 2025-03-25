@@ -17,6 +17,10 @@ class TransactionRepository extends ServiceEntityRepository
         0 => 'payment',
         1 => 'deposit',
     ];
+    const TRANSACTION_NAMES= [
+        0 => 'Оплата',
+        1 => 'Пополнение',
+    ];
 
     public function __construct(ManagerRegistry $registry)
     {
@@ -49,7 +53,7 @@ class TransactionRepository extends ServiceEntityRepository
                     ->setParameter('validAt', new \DateTimeImmutable());
             }
 
-            return $result->orderBy('t.id', 'ASC')
+            return $result->orderBy('t.createdAt', 'DESC')
                 ->getQuery()
                 ->getResult();
         }
@@ -63,8 +67,9 @@ class TransactionRepository extends ServiceEntityRepository
                 ->innerJoin('t.client', 'usr')
                 ->andWhere('c.type = :type')
                 ->setParameter('type', array_flip(CourseRepository::COURSE_TYPES)['rent'])
-                ->andWhere('t.validAt < :validAt')
+                ->andWhere('t.validAt < :validAt and t.validAt > :now')
                 ->setParameter('validAt', $date)
+                ->setParameter('now', new \DateTime())
                 ->getQuery()->getResult();
         }
 

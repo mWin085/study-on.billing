@@ -102,7 +102,7 @@ class TransactionsController extends AbstractController{
                 $data = [
                     'id' => $transaction->getId(),
                     'code' => ($transaction->getCourse()) ? $transaction->getCourse()->getCode() : null,
-                    'type' => TransactionRepository::TRANSACTION_TYPES[$transaction->getType()],
+                    'type' => TransactionRepository::TRANSACTION_NAMES[$transaction->getType()],
                     'amount' => $transaction->getValue(),
                     'createdAt' => $transaction->getCreatedAt()->format('c'),
                 ];

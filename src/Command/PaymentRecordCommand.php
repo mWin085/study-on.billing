@@ -64,6 +64,7 @@ class PaymentRecordCommand extends Command
                 ->context([
                     'title' => 'Отчет об оплаченных курсах за период ' . (new \DateTime())->sub($interval)->format('d.m.Y') . ' - ' . (new \DateTime())->format('d.m.Y'),
                     'reportData' => $reportData,
+                    'total' => array_sum(array_column($reportData, 'summ'))
                 ]);
 
                 try {

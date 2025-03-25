@@ -165,7 +165,7 @@ class ApiController extends AbstractController
         $userByEmail = $entityManager->getRepository(User::class)->findBy(['email' => $userDto->username]);
 
         if ($userByEmail) {
-            return $this->json(['error' => 'User with this email already exists'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['error' => 'Пользователь с таким email уже существует'], Response::HTTP_BAD_REQUEST);
         }
 
         if (count($errors) > 0)
@@ -180,6 +180,7 @@ class ApiController extends AbstractController
         $entityManager->flush();
 
         $token = $tokenManager->create($user);
+
 
         $refreshToken = $refreshTokenGenerator->createForUserWithTtl(
             $user,
@@ -239,7 +240,7 @@ class ApiController extends AbstractController
 
         $user = $this->getUser();
         return $this->json(
-            ["code" => Response::HTTP_CREATED, "username" => $user->getEmail(), "roles" => $user->getRoles(), "balance" => $user->getBalance()]
+            ["code" => Response::HTTP_OK, "username" => $user->getEmail(), "roles" => $user->getRoles(), "balance" => $user->getBalance()]
         );
         //$jwt = (array)JWTManager::decode($token);
     }
