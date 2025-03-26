@@ -23,7 +23,7 @@ class PaymentRecordCommand extends Command
     private TransactionRepository $transactionRepository;
     private MailerInterface $mailer;
 
-    public function __construct(TransactionRepository $transactionRepository, MailerInterface $mailer)
+    public function __construct(TransactionRepository $transactionRepository, MailerInterface $mailer, private string $adminEmail)
     {
         parent::__construct();
         $this->transactionRepository = $transactionRepository;
@@ -58,7 +58,7 @@ class PaymentRecordCommand extends Command
             }
 
             $email = (new TemplatedEmail())
-                ->to(new Address('study-on@example.com'))
+                ->to(new Address($this->adminEmail))
                 ->subject('Отчет по оплатам за месяц')
                 ->htmlTemplate('mail/paymentReport.html.twig')
                 ->context([
